@@ -18,24 +18,31 @@ interface SkinportItemWithPrices extends SkinportItem {
 }
 
 export class SkinportService {
-  static async getItemById(_id: number): Promise<SkinportItem[]> {
-    const response = await fetch(`https://api.skinport.com/v1/items/${_id}`);
+  static async getItems(): Promise<SkinportItem[]> {
+    const response = await fetch(`https://api.skinport.com/v1/items`);
     return await response.json();
   }
 
-  static async calculatePrice(item: any, tradable: boolean): Promise<number> {
-    return tradable ? item.min_price : item.max_price;
+  static async getNonTradableItems(): Promise<SkinportItem[]> {
+    const response = await fetch(`https://api.skinport.com/v1/items?tradable=1`);
+    return await response.json();
+  }
+
+  static async getItemById(_id: number): Promise<SkinportItem> {
+    const items = await this.getItems();
+    return items[_id];
   }
 
   static async getItemsWithPrices(): Promise<SkinportItemWithPrices[]> {
-    const response = await fetch('https://api.skinport.com/v1/items');
-    const items = await response.json();
-    return await Promise.all(
-      items.map(async item => {
-        const min_tradable = await this.calculatePrice(item, true);
-        const min_non_tradable = await this.calculatePrice(item, false);
-        return { ...item, min_tradable, min_non_tradable };
-      }),
-    );
+    const tradableItems = await this.getItems();
+    const nonTradableItems = await this.getNonTradableItems();
+
+    return await Promise.all(tradableItems.map((tradableItem, index) => {
+      return {
+        ...tradableItem,
+        min_tradable: tradableItem.min_price,
+        min_non_tradable: nonTradableItems[index].min_price,
+      };
+    }));
   }
 }

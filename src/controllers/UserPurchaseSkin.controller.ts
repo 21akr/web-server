@@ -2,19 +2,20 @@ import { Request, Response } from 'express';
 import { SkinportService, UserService } from '../services';
 
 export async function UserPurchaseSkinController(req: Request, res: Response) {
-  const userId = parseInt(req.params.userId);
-  const itemId = parseInt(req.params.itemId);
+  const userId: number = req.body.id;
+  const itemId: number = req.body.itemId;
 
   try {
     const userBalance = await UserService.getBalance(userId);
     const item = await SkinportService.getItemById(itemId);
-    const price = await SkinportService.calculatePrice(item, true);
+    const price = item?.min_price;
 
-    if (userBalance >= price) {
+    if(!item) throw new Error('Item not found');
+
+    if (price !== null && userBalance >= price) {
       const newBalance = userBalance - price;
       await UserService.updateBalance(userId, newBalance);
-
-      res.json({ message: 'Purchase successful' });
+      res.send(`An item for ${price} EUR is purchased!`)
     } else {
       res.status(400).send('Insufficient funds');
     }
