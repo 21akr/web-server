@@ -3,6 +3,10 @@ import { RedisService } from './Redis.service';
 const redis = new RedisService();
 redis.connect();
 
+async function cachedData(): Promise<string | null> {
+  return await redis.get('itemsWithPrices');
+}
+
 interface SkinportItem {
   market_hash_name: string;
   currency: string;
@@ -26,24 +30,30 @@ export class SkinportService {
   private static expires = 3600;
 
   static async getItems(): Promise<SkinportItem[]> {
-    const response = await fetch(`https://api.skinport.com/v1/items?tradable=1`);
-    return await response.json();
+    const tradableItems = await fetch(`https://api.skinport.com/v1/items?tradable=1`);
+    return await tradableItems.json();
   }
 
   static async getNonTradableItems(): Promise<SkinportItem[]> {
-    const response = await fetch(`https://api.skinport.com/v1/items`);
-    return await response.json();
+    const nonTradableItems = await fetch(`https://api.skinport.com/v1/items`);
+    return await nonTradableItems.json();
   }
 
   static async getItemById(_id: number): Promise<SkinportItem> {
+    const data = await cachedData();
+    if (data) {
+      const items = JSON.parse(data);
+      return items[_id];
+    }
+
     const items = await this.getItems();
     return items[_id];
   }
 
   static async getItemsWithPrices(): Promise<SkinportItemWithPrices[]> {
-    const cachedData = await redis.get('itemsWithPrices');
-    if (cachedData) {
-      return JSON.parse(cachedData);
+    const data = await cachedData();
+    if (data) {
+      return JSON.parse(data);
     }
 
     const [tradableItems, nonTradableItems] = await Promise.all([this.getItems(), this.getNonTradableItems()]);
