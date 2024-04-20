@@ -1,3 +1,8 @@
+import { RedisService } from './Redis.service';
+
+const redis = new RedisService();
+redis.connect();
+
 interface SkinportItem {
   market_hash_name: string;
   currency: string;
@@ -18,13 +23,15 @@ interface SkinportItemWithPrices extends SkinportItem {
 }
 
 export class SkinportService {
+  private static expires = 3600;
+
   static async getItems(): Promise<SkinportItem[]> {
-    const response = await fetch(`https://api.skinport.com/v1/items`);
+    const response = await fetch(`https://api.skinport.com/v1/items?tradable=1`);
     return await response.json();
   }
 
   static async getNonTradableItems(): Promise<SkinportItem[]> {
-    const response = await fetch(`https://api.skinport.com/v1/items?tradable=1`);
+    const response = await fetch(`https://api.skinport.com/v1/items`);
     return await response.json();
   }
 
@@ -34,15 +41,23 @@ export class SkinportService {
   }
 
   static async getItemsWithPrices(): Promise<SkinportItemWithPrices[]> {
-    const tradableItems = await this.getItems();
-    const nonTradableItems = await this.getNonTradableItems();
+    const cachedData = await redis.get('itemsWithPrices');
+    if (cachedData) {
+      return JSON.parse(cachedData);
+    }
 
-    return await Promise.all(tradableItems.map((tradableItem, index) => {
+    const [tradableItems, nonTradableItems] = await Promise.all([this.getItems(), this.getNonTradableItems()]);
+
+    const itemsWithPrices = tradableItems.map((tradableItem, index) => {
       return {
         ...tradableItem,
         min_tradable: tradableItem.min_price,
         min_non_tradable: nonTradableItems[index].min_price,
       };
-    }));
+    });
+
+    await redis.set('itemsWithPrices', JSON.stringify(itemsWithPrices), this.expires);
+
+    return itemsWithPrices;
   }
 }
