@@ -1,3 +1,5 @@
+import { Request, Response } from 'express';
+
 interface SkinportItem {
   market_hash_name: string;
   currency: string;
@@ -19,12 +21,12 @@ interface SkinportItemWithPrices extends SkinportItem {
 
 export class SkinportService {
   static async getItems(): Promise<SkinportItem[]> {
-    const response = await fetch(`https://api.skinport.com/v1/items`);
+    const response = await fetch(`https://api.skinport.com/v1/items?tradable=1`);
     return await response.json();
   }
 
   static async getNonTradableItems(): Promise<SkinportItem[]> {
-    const response = await fetch(`https://api.skinport.com/v1/items?tradable=1`);
+    const response = await fetch(`https://api.skinport.com/v1/items`);
     return await response.json();
   }
 
@@ -34,15 +36,17 @@ export class SkinportService {
   }
 
   static async getItemsWithPrices(): Promise<SkinportItemWithPrices[]> {
-    const tradableItems = await this.getItems();
-    const nonTradableItems = await this.getNonTradableItems();
+    const [tradableItems, nonTradableItems] = await Promise.all([
+      this.getItems(),
+      this.getNonTradableItems()
+    ]);
 
-    return await Promise.all(tradableItems.map((tradableItem, index) => {
+    return tradableItems.map((tradableItem, index) => {
       return {
         ...tradableItem,
         min_tradable: tradableItem.min_price,
         min_non_tradable: nonTradableItems[index].min_price,
       };
-    }));
+    });
   }
 }
