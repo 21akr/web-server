@@ -8,9 +8,9 @@ export async function UserPurchaseSkinController(req: Request, res: Response) {
   try {
     const userBalance = await UserService.getBalance(userId);
     const item = await SkinportService.getItemById(itemId);
-    const price = item?.min_price;
+    const price = item?.min_price || 10;
 
-    if(!item) throw new Error('Item not found');
+    // if(!item) throw new Error('Item not found');
 
     if (price !== null && userBalance >= price) {
       const newBalance = userBalance - price;
