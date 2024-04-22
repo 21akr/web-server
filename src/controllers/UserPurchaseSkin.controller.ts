@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { SkinportService, UserService } from '../services';
 
 export async function UserPurchaseSkinController(req: Request, res: Response) {
-  const userId: number = parseInt(req.params.id);
+  const userId: number = parseInt(req.params.userId);
   const itemId: number = parseInt(req.params.itemId);
 
   try {
