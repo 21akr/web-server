@@ -2,11 +2,12 @@ import { Request, Response } from 'express';
 import { SkinportService, UserService } from '../services';
 
 export async function UserPurchaseSkinController(req: Request, res: Response) {
-  const userId: number = parseInt(req.params.userId);
-  const itemId: number = parseInt(req.params.itemId);
+  const userId: number = parseInt(<string>req.query.userId);
+  // @ts-ignore
+  const itemId: number = (+req.query.itemId);
 
-  console.log(req.query);
-  console.log(req);
+  console.log(typeof userId);
+  console.log(typeof itemId);
 
   try {
     const userBalance = await UserService.getBalance(userId);
