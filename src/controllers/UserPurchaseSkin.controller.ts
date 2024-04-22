@@ -15,7 +15,7 @@ export async function UserPurchaseSkinController(req: Request, res: Response) {
     if (price !== null && userBalance >= price) {
       const newBalance = userBalance - price;
       await UserService.updateBalance(userId, newBalance);
-      res.send(`An item for ${price} EUR is purchased!\nYour balance is: ${userBalance}`)
+      res.send(`An item for ${price} EUR is purchased!\nYour balance is: ${newBalance}`)
     } else {
       res.status(400).send('Insufficient funds');
     }
