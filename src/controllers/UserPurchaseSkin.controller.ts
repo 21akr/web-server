@@ -5,6 +5,8 @@ export async function UserPurchaseSkinController(req: Request, res: Response) {
   const userId: number = parseInt(req.params.userId);
   const itemId: number = parseInt(req.params.itemId);
 
+  console.log(req.params);
+
   try {
     const userBalance = await UserService.getBalance(userId);
     const item = await SkinportService.getItemById(itemId);
