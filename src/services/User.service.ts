@@ -1,4 +1,4 @@
-import { db } from '../../index';
+import { db } from './Postgres.service';
 
 export class UserService {
   static async getBalance(_id: number): Promise<number> {
