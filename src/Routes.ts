@@ -4,4 +4,4 @@ import { GetItemsListController, UserPurchaseSkinController } from './controller
 export const router = Router();
 
 router.get('/items', GetItemsListController);
-router.post('/purchase', UserPurchaseSkinController);
+router.get('/purchase', UserPurchaseSkinController);
