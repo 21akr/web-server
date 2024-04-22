@@ -5,7 +5,8 @@ export async function UserPurchaseSkinController(req: Request, res: Response) {
   const userId: number = parseInt(req.params.userId);
   const itemId: number = parseInt(req.params.itemId);
 
-  console.log(req.params);
+  console.log(req.query);
+  console.log(req);
 
   try {
     const userBalance = await UserService.getBalance(userId);
