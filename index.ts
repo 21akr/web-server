@@ -10,7 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 
 export const db = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.CUSTOM_DATABASE_URL,
   // user: process.env.PGUSER,
   //   host: process.env.PGHOST,
   //   database: process.env.PGDATABASE,
