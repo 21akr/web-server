@@ -1,5 +1,4 @@
 import { createClient } from 'redis';
-import { promisify } from 'util';
 
 export class RedisService {
   private client: any;
@@ -21,9 +20,8 @@ export class RedisService {
   }
 
   public async set<T = string>(key: string, value: T, duration?: number): Promise<boolean> {
-    const setAsync = promisify(this.client.set).bind(this.client);
     try {
-      await setAsync(key, value);
+      this.client.set(key, value);
       if (duration) {
         this.client.expire(key, duration);
       }
@@ -35,12 +33,26 @@ export class RedisService {
   }
 
   public async get(key: string): Promise<string | null> {
-    const getAsync = promisify(this.client.get).bind(this.client);
     try {
-      return await getAsync(key);
+      return await this.client.get(key);
     } catch (err) {
       console.error('REDIS ERROR', err);
       throw err;
     }
+  }
+
+  public async delete(key: string): Promise<boolean> {
+    try {
+      await this.client.del(key);
+      return true;
+    } catch (err) {
+      console.error('REDIS ERROR', err);
+      throw err;
+    }
+  }
+
+  public async disconnect(): Promise<void> {
+    await this.client.quit();
+    console.log('Redis client disconnected');
   }
 }
