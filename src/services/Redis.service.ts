@@ -1,4 +1,5 @@
 import { createClient } from 'redis';
+import { promisify } from 'util';
 
 export class RedisService {
   private client: any;
@@ -20,10 +21,12 @@ export class RedisService {
   }
 
   public async set<T = string>(key: string, value: T, duration?: number): Promise<boolean> {
+    const setAsync = promisify(this.client.set).bind(this.client);
     try {
-      this.client.set(key, value);
+      await setAsync(key, value);
       if (duration) {
-        this.client.expire(key, duration);
+        const expireAsync = promisify(this.client.expire).bind(this.client);
+        await expireAsync(key, duration);
       }
       return true;
     } catch (err) {
@@ -33,8 +36,9 @@ export class RedisService {
   }
 
   public async get(key: string): Promise<string | null> {
+    const getAsync = promisify(this.client.get).bind(this.client);
     try {
-      return await this.client.get(key);
+      return await getAsync(key);
     } catch (err) {
       console.error('REDIS ERROR', err);
       throw err;
@@ -42,8 +46,9 @@ export class RedisService {
   }
 
   public async delete(key: string): Promise<boolean> {
+    const delAsync = promisify(this.client.del).bind(this.client);
     try {
-      await this.client.del(key);
+      await delAsync(key);
       return true;
     } catch (err) {
       console.error('REDIS ERROR', err);
