@@ -4,11 +4,17 @@ import { SkinportService, UserService } from '../services';
 export async function UserPurchaseSkinController(req: Request, res: Response) {
   const userId = Number(req.query.userId);
   const itemId = Number(req.query.itemId);
+  console.log(userId);
+  console.log(itemId);
+
+  console.log(typeof userId);
+  console.log(typeof itemId);
 
   try {
     const userBalanceCents = await UserService.getBalance(userId);
     const item = await SkinportService.getItemById(itemId);
     const price = item?.min_price;
+    console.log('price, ', price);
 
     if (!item) throw new Error('Item not found');
 
