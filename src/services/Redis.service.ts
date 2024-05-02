@@ -2,7 +2,7 @@ import { createClient } from 'redis';
 
 export class RedisService {
   private client: any;
-  private url: string = process.env.HEROKU_REDIS_AQUA_URL || 'redis://127.0.0.1:6379';
+  private url: string = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 
   constructor() {
     this.client = createClient({ url: this.url });
