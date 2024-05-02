@@ -8,13 +8,12 @@ export async function UserPurchaseSkinController(req: Request, res: Response) {
   try {
     const userBalanceCents = await UserService.getBalance(userId);
     const item = await SkinportService.getItemById(itemId);
-    const price = item?.min_price;
-    console.log(price);
+    const price = item?.min_price * 100;
 
     if (!item) throw new Error('Item not found');
 
     if (price !== undefined && userBalanceCents >= price) {
-      const newBalanceCents = userBalanceCents - Math.round(price * 100);
+      const newBalanceCents = userBalanceCents - Math.round(price);
       await UserService.updateBalance(userId, newBalanceCents);
       const newBalance = newBalanceCents / 100;
       res.send(`An item for ${price} EUR is purchased!\nYour balance is: ${newBalance} EUR`);
