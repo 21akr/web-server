@@ -7,7 +7,7 @@ export class RedisService {
 
   constructor() {
     this.client = createClient({ url: this.url });
-    this.connect();
+    this.client.connect();
   }
 
   connect(): void {
